@@ -1,0 +1,5 @@
+USUARIO
+
+username 3-20 caracteres
+email 4-100 caracteres
+password 5-50 caracteres 
