@@ -89,7 +89,7 @@ export const Nav = () => {
                 <ToggleButton onClick={handleActiveMenu}>
                     { activeMenu ? <Close /> : <Menu /> } 
                 </ToggleButton>
-                <NavMenu className={activeMenu ? "active" : ""}>
+                <NavMenu style={{zIndex: "99"}} className={activeMenu ? "active" : ""}>
                     <NavLink to="/">INICIO</NavLink>
                     <NavLink to="/estadisticas">ESTADISTICAS</NavLink>
                     <NavLink to="/auth">INGRESAR</NavLink>

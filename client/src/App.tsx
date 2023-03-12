@@ -3,8 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { Nav } from "./components/Nav";
 import Auth from "./pages/Auth";
 
-
-const App = () => {
+const App: React.FC = () => {
   return <>
     <Nav />
     <Routes>
