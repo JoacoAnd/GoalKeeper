@@ -3,9 +3,10 @@ import styled from 'styled-components';
 import { GiSoccerBall } from 'react-icons/gi';
 import { AiOutlineMenu as Menu, AiOutlineClose as Close } from 'react-icons/ai'
 import Flex from './Flex';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@mui/material';
-
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { logout } from '../redux/reducers/auth';
 
 const NavContainer = styled.nav`
     position: relative;
@@ -36,13 +37,20 @@ const NavLink = styled(Link)`
     font-weight: 600;
     margin: 1em;
 
-    &.ingresar {
-        background-color: #11c300;
+    &.relleno {
         padding: .8em;
         border-radius: 4px;
         color: #ffffff;
     }
-`
+
+    &.ingresar {
+        background-color: #11c300;
+    }
+
+    &.logout {
+        background-color: #c30000;
+    }
+    `
 
 const NavMenu = styled.div`
     right: -100%;
@@ -70,12 +78,25 @@ const ToggleButton = styled.div`
 `
 
 export const Nav = () => {
-    const smallDevices = useMediaQuery("(max-width: 768px)");
-
+    // ESTADOS
     const [activeMenu, setActiveMenu] = useState(false);
+    const smallDevices = useMediaQuery("(max-width: 768px)");
+    
+    // HOOKS
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const { user } = useAppSelector(state => state.auth);
 
+    // FUNCIONES
     const handleActiveMenu = () => {
         setActiveMenu(!activeMenu);
+    };
+
+    const handleLogout = (e: React.MouseEvent) => {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        dispatch(logout());
+        navigate("/");
     };
 
     return <NavContainer>
@@ -90,14 +111,33 @@ export const Nav = () => {
                     { activeMenu ? <Close /> : <Menu /> } 
                 </ToggleButton>
                 <NavMenu style={{zIndex: "99"}} className={activeMenu ? "active" : ""}>
-                    <NavLink to="/">INICIO</NavLink>
-                    <NavLink to="/estadisticas">ESTADISTICAS</NavLink>
-                    <NavLink to="/auth">INGRESAR</NavLink>
+                    {
+                        !user ? 
+                        <>
+                            <NavLink to="/">INICIO</NavLink>
+                            <NavLink to="/auth">INGRESAR</NavLink>
+                        </>
+                        :
+                        <>
+                            <NavLink to="/estadisticas">ESTADISTICAS</NavLink>
+                            <NavLink to="/perfil">PERFIL</NavLink>                        
+                            <NavLink onClick={handleLogout} to="/">LOGOUT</NavLink>
+                        </>
+                    }
+                    
                 </NavMenu>
             </div>
             : <Flex>
-            <NavLink to="/estadisticas">ESTADISTICAS</NavLink>
-            <NavLink className='ingresar' to="/auth">INGRESAR</NavLink>
+                {
+                    !user ? <>
+                        <NavLink className='relleno ingresar' to="/auth">INGRESAR</NavLink>
+                    </>
+                    :  <>
+                        <NavLink to="/estadisticas">ESTADISTICAS</NavLink> 
+                        <NavLink style={{textTransform: "uppercase"}} to="/perfil">{user!.username || ""}</NavLink> 
+                        <NavLink onClick={handleLogout} to="/" className='relleno logout'>LOGOUT</NavLink>
+                    </>
+                }
         </Flex>
         }
     </NavContainer>

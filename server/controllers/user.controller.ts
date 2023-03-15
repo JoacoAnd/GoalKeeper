@@ -12,38 +12,38 @@ function createToken(user: IUser) {
 
 export const register = async (req: Request, res: Response) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.mapped() });
-
+    if (!errors.isEmpty()) return res.status(400).json({ message: errors.array()[0].msg });
+   
     const { username, email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if(user) return res.status(400).json({ msg: "Ya existe una cuenta con ese correo" });
+    if(user) return res.status(400).json({ message: "Ya existe una cuenta con ese correo" });
 
     try {
         const newUser: IUser = await User.create({ username, email, password });
-        return res.status(200).json({ token: createToken(newUser) });
+        return res.status(200).json({ token: createToken(newUser), email, username });
     } catch (error) {
-        return res.status(400).json({ msg: "Error. Intentelo mas tarde" });
         console.log(error);
+        return res.status(400).json({ message: "Error. Intentelo mas tarde" });
     }; 
 };
 
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    if (!email || !password) return res.status(400).json({ msg: "Debes ingresar el correo y la contraseña" });
+    if (!email || !password) return res.status(400).json({ message: "Debes ingresar el correo y la contraseña" });
 
     try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ msg: "No existe ninguna cuenta con ese correo" });
+        const user: IUser | null = await User.findOne({ email });
+        if (!user) return res.status(400).json({ message: "No existe ninguna cuenta con ese correo" });
 
         const matchPassword: boolean = await user.comparePassword(password);
 
-        if (matchPassword) return res.status(200).json({ token: createToken(user) }); 
-        return res.status(400).json({ msg: "La contraseña que ingresaste es incorrecta" });
+        if (matchPassword) return res.status(200).json({ token: createToken(user), email: user.email, username: user.username }); 
+        return res.status(400).json({ message: "La contraseña que ingresaste es incorrecta" });
 
     } catch (error) {
-        return res.status(400).json({ msg: "Error. Intentelo mas tarde" });
         console.log(error);
+        return res.status(400).json({ message: "Error. Intentelo mas tarde" });
     }
 };
